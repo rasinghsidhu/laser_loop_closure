@@ -10,6 +10,7 @@ find_package(GTSAM REQUIRED)
 if (NOT GTSAM_FOUND)
   message(FATAL_ERROR "This program requires the GTSAM library.")
 endif(NOT GTSAM_FOUND)
+set(GTSAM_LIBRARIES "gtsam")
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -36,6 +37,7 @@ catkin_package(
     pcl_ros
   DEPENDS
     PCL
+    GTSAM
 )
 
 include(CheckCXXCompilerFlag)

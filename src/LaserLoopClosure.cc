@@ -62,7 +62,7 @@ using gtsam::Vector3;
 using gtsam::Vector6;
 
 LaserLoopClosure::LaserLoopClosure()
-    : key_(0), last_closure_key_(std::numeric_limits<int>::min()) {}
+    : key_(0), last_closure_key_(std::numeric_limits<unsigned int>::min()) {}
 
 LaserLoopClosure::~LaserLoopClosure() {}
 
