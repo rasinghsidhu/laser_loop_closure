@@ -90,49 +90,49 @@ bool LaserLoopClosure::Initialize(const ros::NodeHandle& n) {
 bool LaserLoopClosure::LoadParameters(const ros::NodeHandle& n) {
 
   // Load frame ids.
-  if (!pu::Get("frame_id/fixed", fixed_frame_id_)) return false;
-  if (!pu::Get("frame_id/base", base_frame_id_)) return false;
+  if (!pu::get("frame_id/fixed", fixed_frame_id_)) return false;
+  if (!pu::get("frame_id/base", base_frame_id_)) return false;
 
   // Should we turn loop closure checking on or off?
-  if (!pu::Get("check_for_loop_closures", check_for_loop_closures_)) return false;
+  if (!pu::get("check_for_loop_closures", check_for_loop_closures_)) return false;
 
   // Load ISAM2 parameters.
   unsigned int relinearize_skip = 1;
   double relinearize_threshold = 0.01;
-  if (!pu::Get("relinearize_skip", relinearize_skip)) return false;
-  if (!pu::Get("relinearize_threshold", relinearize_threshold)) return false;
+  if (!pu::get("relinearize_skip", relinearize_skip)) return false;
+  if (!pu::get("relinearize_threshold", relinearize_threshold)) return false;
 
   // Load loop closing parameters.
-  if (!pu::Get("translation_threshold", translation_threshold_)) return false;
-  if (!pu::Get("proximity_threshold", proximity_threshold_)) return false;
-  if (!pu::Get("max_tolerable_fitness", max_tolerable_fitness_)) return false;
-  if (!pu::Get("skip_recent_poses", skip_recent_poses_)) return false;
-  if (!pu::Get("poses_before_reclosing", poses_before_reclosing_)) return false;
+  if (!pu::get("translation_threshold", translation_threshold_)) return false;
+  if (!pu::get("proximity_threshold", proximity_threshold_)) return false;
+  if (!pu::get("max_tolerable_fitness", max_tolerable_fitness_)) return false;
+  if (!pu::get("skip_recent_poses", skip_recent_poses_)) return false;
+  if (!pu::get("poses_before_reclosing", poses_before_reclosing_)) return false;
 
   // Load ICP parameters.
-  if (!pu::Get("icp/tf_epsilon", icp_tf_epsilon_)) return false;
-  if (!pu::Get("icp/corr_dist", icp_corr_dist_)) return false;
-  if (!pu::Get("icp/iterations", icp_iterations_)) return false;
+  if (!pu::get("icp/tf_epsilon", icp_tf_epsilon_)) return false;
+  if (!pu::get("icp/corr_dist", icp_corr_dist_)) return false;
+  if (!pu::get("icp/iterations", icp_iterations_)) return false;
 
   // Load initial position and orientation.
   double init_x = 0.0, init_y = 0.0, init_z = 0.0;
   double init_roll = 0.0, init_pitch = 0.0, init_yaw = 0.0;
-  if (!pu::Get("init/position/x", init_x)) return false;
-  if (!pu::Get("init/position/y", init_y)) return false;
-  if (!pu::Get("init/position/z", init_z)) return false;
-  if (!pu::Get("init/orientation/roll", init_roll)) return false;
-  if (!pu::Get("init/orientation/pitch", init_pitch)) return false;
-  if (!pu::Get("init/orientation/yaw", init_yaw)) return false;
+  if (!pu::get("init/position/x", init_x)) return false;
+  if (!pu::get("init/position/y", init_y)) return false;
+  if (!pu::get("init/position/z", init_z)) return false;
+  if (!pu::get("init/orientation/roll", init_roll)) return false;
+  if (!pu::get("init/orientation/pitch", init_pitch)) return false;
+  if (!pu::get("init/orientation/yaw", init_yaw)) return false;
 
   // Load initial position and orientation noise.
   double sigma_x = 0.0, sigma_y = 0.0, sigma_z = 0.0;
   double sigma_roll = 0.0, sigma_pitch = 0.0, sigma_yaw = 0.0;
-  if (!pu::Get("init/position_sigma/x", sigma_x)) return false;
-  if (!pu::Get("init/position_sigma/y", sigma_y)) return false;
-  if (!pu::Get("init/position_sigma/z", sigma_z)) return false;
-  if (!pu::Get("init/orientation_sigma/roll", sigma_roll)) return false;
-  if (!pu::Get("init/orientation_sigma/pitch", sigma_pitch)) return false;
-  if (!pu::Get("init/orientation_sigma/yaw", sigma_yaw)) return false;
+  if (!pu::get("init/position_sigma/x", sigma_x)) return false;
+  if (!pu::get("init/position_sigma/y", sigma_y)) return false;
+  if (!pu::get("init/position_sigma/z", sigma_z)) return false;
+  if (!pu::get("init/orientation_sigma/roll", sigma_roll)) return false;
+  if (!pu::get("init/orientation_sigma/pitch", sigma_pitch)) return false;
+  if (!pu::get("init/orientation_sigma/yaw", sigma_yaw)) return false;
 
   // Create the ISAM2 solver.
   ISAM2Params parameters;
@@ -308,8 +308,8 @@ bool LaserLoopClosure::FindLoopClosures(
       continue;
 
     const gu::Transform3 pose2 = ToGu(values_.at<Pose3>(other_key));
-    const gu::Transform3 difference = gu::PoseDelta(pose1, pose2);
-    if (difference.translation.Norm() < proximity_threshold_) {
+    const gu::Transform3 difference = gu::pose_delta(pose1, pose2);
+    if (difference.translation.norm() < proximity_threshold_) {
       // Found a potential loop closure! Perform ICP between the two scans to
       // determine if there really is a loop to close.
       const PointCloud::ConstPtr scan2 = keyed_scans_[other_key];
@@ -359,8 +359,8 @@ void LaserLoopClosure::GetMaximumLikelihoodPoints(PointCloud* points) {
 
     const gu::Transform3 pose = ToGu(values_.at<Pose3>(key));
     Eigen::Matrix4d b2w;
-    b2w.block(0, 0, 3, 3) = pose.rotation.Eigen();
-    b2w.block(0, 3, 3, 1) = pose.translation.Eigen();
+    b2w.block(0, 0, 3, 3) = pose.rotation.eigen();
+    b2w.block(0, 3, 3, 1) = pose.translation.eigen();
 
     // Transform the body-frame scan into world frame.
     PointCloud scan_world;
@@ -469,14 +469,14 @@ bool LaserLoopClosure::PerformICP(const PointCloud::ConstPtr& scan1,
   filter_.Filter(scan2, scan2_filtered);
 
   // Set source point cloud. Transform it to pose 2 frame to get a delta.
-  const Eigen::Matrix<double, 3, 3> R1 = pose1.rotation.Eigen();
-  const Eigen::Matrix<double, 3, 1> t1 = pose1.translation.Eigen();
+  const Eigen::Matrix<double, 3, 3> R1 = pose1.rotation.eigen();
+  const Eigen::Matrix<double, 3, 1> t1 = pose1.translation.eigen();
   Eigen::Matrix4d body1_to_world;
   body1_to_world.block(0, 0, 3, 3) = R1;
   body1_to_world.block(0, 3, 3, 1) = t1;
 
-  const Eigen::Matrix<double, 3, 3> R2 = pose2.rotation.Eigen();
-  const Eigen::Matrix<double, 3, 1> t2 = pose2.translation.Eigen();
+  const Eigen::Matrix<double, 3, 3> R2 = pose2.rotation.eigen();
+  const Eigen::Matrix<double, 3, 1> t2 = pose2.translation.eigen();
   Eigen::Matrix4d body2_to_world;
   body2_to_world.block(0, 0, 3, 3) = R2;
   body2_to_world.block(0, 3, 3, 1) = t2;
@@ -512,13 +512,13 @@ bool LaserLoopClosure::PerformICP(const PointCloud::ConstPtr& scan1,
 
   // Update the pose-to-pose odometry estimate using the output of ICP.
   const gu::Transform3 update =
-      gu::PoseUpdate(gu::PoseInverse(pose1),
-                     gu::PoseUpdate(gu::PoseInverse(delta_icp), pose1));
+      gu::pose_update(gu::pose_inverse(pose1),
+                     gu::pose_update(gu::pose_inverse(delta_icp), pose1));
 
-  *delta = gu::PoseUpdate(update, gu::PoseDelta(pose1, pose2));
+  *delta = gu::pose_update(update, gu::pose_delta(pose1, pose2));
 
   // TODO: Use real ICP covariance.
-  covariance->Zeros();
+  *covariance = Mat66(0);
   for (int i = 0; i < 3; ++i)
     (*covariance)(i, i) = 0.01;
   for (int i = 3; i < 6; ++i)
@@ -556,8 +556,8 @@ void LaserLoopClosure::PublishPoseGraph() {
       gu::Vec3 p1 = ToGu(values_.at<Pose3>(key1)).translation;
       gu::Vec3 p2 = ToGu(values_.at<Pose3>(key2)).translation;
 
-      m.points.push_back(gr::ToRosPoint(p1));
-      m.points.push_back(gr::ToRosPoint(p2));
+      m.points.push_back(gr::toPoint(p1));
+      m.points.push_back(gr::toPoint(p2));
     }
     odometry_edge_pub_.publish(m);
   }
@@ -583,8 +583,8 @@ void LaserLoopClosure::PublishPoseGraph() {
       gu::Vec3 p1 = ToGu(values_.at<Pose3>(key1)).translation;
       gu::Vec3 p2 = ToGu(values_.at<Pose3>(key2)).translation;
 
-      m.points.push_back(gr::ToRosPoint(p1));
-      m.points.push_back(gr::ToRosPoint(p2));
+      m.points.push_back(gr::toPoint(p1));
+      m.points.push_back(gr::toPoint(p2));
     }
     loop_edge_pub_.publish(m);
   }
@@ -607,7 +607,7 @@ void LaserLoopClosure::PublishPoseGraph() {
 
     for (const auto& keyed_pose : values_) {
       gu::Vec3 p = ToGu(values_.at<Pose3>(keyed_pose.key)).translation;
-      m.points.push_back(gr::ToRosPoint(p));
+      m.points.push_back(gr::toPoint(p));
     }
     graph_node_pub_.publish(m);
   }
@@ -631,7 +631,7 @@ void LaserLoopClosure::PublishPoseGraph() {
     for (const auto& keyed_pose : values_) {
       if (keyed_scans_.count(keyed_pose.key)) {
         gu::Vec3 p = ToGu(values_.at<Pose3>(keyed_pose.key)).translation;
-        m.points.push_back(gr::ToRosPoint(p));
+        m.points.push_back(gr::toPoint(p));
       }
     }
     graph_node_pub_.publish(m);
@@ -653,7 +653,7 @@ void LaserLoopClosure::PublishPoseGraph() {
     m.scale.x = proximity_threshold_ * 2.0;
     m.scale.y = proximity_threshold_ * 2.0;
     m.scale.z = proximity_threshold_ * 2.0;
-    m.pose = gr::ToRosPose(gu::Transform3::Identity());
+    m.pose = gr::toPose(gu::Transform3::identity());
     closure_area_pub_.publish(m);
   }
 
@@ -669,7 +669,7 @@ void LaserLoopClosure::PublishPoseGraph() {
       pose_graph_msgs::PoseGraphNode node;
       node.key = keyed_pose.key;
       node.header.frame_id = fixed_frame_id_;
-      node.pose = gr::ToRosPose(t);
+      node.pose = gr::toPose(t);
       if (keyed_stamps_.count(keyed_pose.key)) {
         node.header.stamp = keyed_stamps_[keyed_pose.key];
       } else {

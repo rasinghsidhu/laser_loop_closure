@@ -38,8 +38,7 @@
 #define LASER_LOOP_CLOSURE_H
 
 #include <ros/ros.h>
-#include <geometry_utils/Matrix3x3.h>
-#include <geometry_utils/Transform3.h>
+#include <geometry_utils/GeometryUtils.h>
 #include <point_cloud_filter/PointCloudFilter.h>
 
 #include <gtsam/base/Vector.h>
